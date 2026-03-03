@@ -14,15 +14,15 @@ import (
 	"time"
 
 	"{{.ModulePath}}/internal/config"
-	"{{.ModulePath}}/internal/service"
+	"{{.ModulePath}}/{{.Arch.Service}}"
 {{- if hasDB .Database}}
-	"{{.ModulePath}}/internal/repository/{{.Database}}"
+	"{{.ModulePath}}/{{.Arch.Repository}}/{{.Database}}"
 {{- end}}
 {{- if isHTTP .Transport}}
-	"{{.ModulePath}}/internal/transport/httpx"
+	"{{.ModulePath}}/{{.Arch.Transport}}/httpx"
 {{- end}}
 {{- if isGRPC .Transport}}
-	"{{.ModulePath}}/internal/transport/grpc"
+	"{{.ModulePath}}/{{.Arch.Transport}}/grpc"
 	grpc_lib "google.golang.org/grpc"
 {{- end}}
 {{- if hasBroker .Broker}}

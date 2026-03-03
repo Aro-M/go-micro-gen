@@ -8,8 +8,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"{{.ModulePath}}/internal/domain"
-	"{{.ModulePath}}/internal/service"
+	"{{.ModulePath}}/{{.Arch.Domain}}"
+	"{{.ModulePath}}/{{.Arch.Service}}"
 )
 
 // Handler holds all HTTP handler dependencies.

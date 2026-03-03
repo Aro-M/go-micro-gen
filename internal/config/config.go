@@ -48,6 +48,48 @@ const (
 	ArchStandard  ArchType = "standard"
 )
 
+// ArchFolders maps standard internal paths to architectural-specific paths.
+type ArchFolders struct {
+	Service    string
+	Repository string
+	Transport  string
+	Domain     string
+}
+
+// GetArchFolders returns the directory mapping for the specified architecture.
+func GetArchFolders(arch ArchType) ArchFolders {
+	switch arch {
+	case ArchDDD:
+		return ArchFolders{
+			Service:    "internal/application",
+			Repository: "internal/infrastructure/persistence",
+			Transport:  "internal/interfaces",
+			Domain:     "internal/domain",
+		}
+	case ArchVertical:
+		return ArchFolders{
+			Service:    "internal/features/core",
+			Repository: "internal/features/data",
+			Transport:  "internal/features/web",
+			Domain:     "internal/features/domain",
+		}
+	case ArchStandard:
+		return ArchFolders{
+			Service:    "internal/app",
+			Repository: "internal/store",
+			Transport:  "internal/api",
+			Domain:     "internal/models",
+		}
+	default: // clean & hexagonal
+		return ArchFolders{
+			Service:    "internal/service",
+			Repository: "internal/repository",
+			Transport:  "internal/transport",
+			Domain:     "internal/domain",
+		}
+	}
+}
+
 // CIType represents the CI/CD provider.
 type CIType string
 
@@ -65,6 +107,8 @@ type ServiceConfig struct {
 	ModulePath string
 	// Architecture pattern to use
 	Architecture ArchType
+	// Architectural Folder overrides
+	Arch ArchFolders
 	// Database type
 	Database DBType
 	// Message broker type

@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"{{.ModulePath}}/internal/domain"
-	"{{.ModulePath}}/internal/service"
+	"{{.ModulePath}}/{{.Arch.Domain}}"
+	"{{.ModulePath}}/{{.Arch.Service}}"
 )
 
 func TestService_Create(t *testing.T) {

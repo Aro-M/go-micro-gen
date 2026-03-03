@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"{{.ModulePath}}/internal/service"
-	"{{.ModulePath}}/internal/transport/httpx"
+	"{{.ModulePath}}/{{.Arch.Service}}"
+	"{{.ModulePath}}/{{.Arch.Transport}}/httpx"
 )
 
 func TestHandler(t *testing.T) {

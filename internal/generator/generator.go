@@ -28,6 +28,9 @@ type Generator struct {
 
 // New creates a new Generator for the given config.
 func New(cfg *config.ServiceConfig) *Generator {
+	if cfg.Arch.Service == "" {
+		cfg.Arch = config.GetArchFolders(cfg.Architecture)
+	}
 	return &Generator{cfg: cfg}
 }
 
@@ -188,6 +191,12 @@ func (g *Generator) resolveOutputPath(tmplPath string) string {
 
 	// Remove .tmpl extension
 	rel = strings.TrimSuffix(rel, ".tmpl")
+
+	// Apply architectural folder mapping
+	rel = strings.Replace(rel, "internal/service", g.cfg.Arch.Service, 1)
+	rel = strings.Replace(rel, "internal/repository", g.cfg.Arch.Repository, 1)
+	rel = strings.Replace(rel, "internal/transport", g.cfg.Arch.Transport, 1)
+	rel = strings.Replace(rel, "internal/domain", g.cfg.Arch.Domain, 1)
 
 	return rel
 }

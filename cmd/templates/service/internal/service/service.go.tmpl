@@ -6,9 +6,9 @@ import (
 	"log/slog"
 
 {{- if hasDB .Database}}
-	"{{.ModulePath}}/internal/repository"
+	"{{.ModulePath}}/{{.Arch.Repository}}"
 {{- end}}
-	"{{.ModulePath}}/internal/domain"
+	"{{.ModulePath}}/{{.Arch.Domain}}"
 )
 
 // Service contains the core business logic for {{.ServiceName}}.
