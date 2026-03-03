@@ -251,13 +251,14 @@ order-service/
 
 ---
 
-## Roadmap
+## Roadmap & Future Ideas
 
-- [x] `go-micro-gen init` — inject structure into an existing project
-- [x] `go-micro-gen add handler` — endpoint generation capability 
-- [x] gRPC transport template
-- [x] Kubernetes manifests Generation (Deployment + Service + ConfigMap)
-- [x] Helm chart generation
+- [ ] **Interactive Web UI (`go-micro-gen ui`)** — A visual dashboard to configure and generate services.
+- [ ] **GraphQL Support** — Scaffolding for `gqlgen` to build GraphQL endpoints alongside REST/gRPC.
+- [ ] **Event-Driven Workers** — Pre-configured consumers/listeners for Kafka and RabbitMQ.
+- [ ] **JWT Auth Middleware** — Out-of-the-box authentication & role-based authorization injected into transports.
+- [ ] **Serverless Scaffolding** — Generate AWS Lambda / GCP Cloud Functions entrypoints from the same logic.
+- [ ] **Database Seeding** — Auto-generated mock data seeders for local development and testing.
 
 ---
 
