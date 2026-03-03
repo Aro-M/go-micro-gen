@@ -161,16 +161,32 @@ go-micro-gen generate \
   --name payment-service \
   --module github.com/acme/payment-service \
   --db postgres \
-  --arch clean \
+  --broker kafka \
+  --transport grpc \
+  --arch ddd \
   --cloud aws \
   --ci github \
-  --redis \
-  --docker \
-  --k8s \
-  --helm \
+  --redis=false \
+  --docker=false \
+  --k8s=false \
+  --helm=false \
   --output ./payment-service \
   --yes
 ```
+
+### Init Mode
+
+If you already have an existing project (with a `go.mod`), you can inject the microservice structure directly into the current directory in various architectural options:
+
+```bash
+go-micro-gen init \
+  --arch vertical \
+  --db mongo \
+  --broker rabbitmq \
+  --transport both \
+  --yes
+```
+This infers the module path and service name automatically and scaffolds the files within `.`.
 
 ---
 
