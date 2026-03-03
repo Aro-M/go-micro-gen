@@ -85,12 +85,20 @@ graph TD
 
 ### Method 1: `go install` (Easiest)
 
-If you have Go installed, you can simply run:
+If you have Go installed, you can simply download and install the latest version globally:
 
 ```bash
-go install github.com/Aro-M/go-micro-gen@latest
+GOPROXY=direct go install github.com/Aro-M/go-micro-gen@latest
 ```
-*Make sure `$(go env GOPATH)/bin` is in your system `$PATH`.*
+*(Note: `GOPROXY=direct` bypasses Go module proxy caching to guarantee you get the absolute newest updates).*
+
+**✅ Troubleshooting `command not found`:**
+If your terminal says `go-micro-gen: command not found` after a successful installation, your Go bin directory is not in your `$PATH`. 
+Fix it by running the following commands:
+```bash
+echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.bashrc
+source ~/.bashrc
+```
 
 ### Method 2: Build from source
 
