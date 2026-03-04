@@ -63,6 +63,11 @@ func (g *Generator) Generate() error {
 // shouldInclude decides whether a template file should be rendered
 // based on the current ServiceConfig (DB type, CI, Redis, etc.)
 func (g *Generator) shouldInclude(tmplPath string) bool {
+	// Exclude template directories meant for other commands
+	if strings.HasPrefix(tmplPath, "add/") {
+		return false
+	}
+
 	// Database-specific templates
 	if (strings.Contains(tmplPath, "/repository/postgres/") || strings.Contains(tmplPath, "/db/migrations/")) && g.cfg.Database != config.DBPostgres {
 		return false
