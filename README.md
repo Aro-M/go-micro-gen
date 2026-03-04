@@ -136,11 +136,13 @@ You'll see an interactive interface like this:
 ```text
 ? Service name:          order-service
 ? Go module path:        github.com/acme/order-service
-? Architecture pattern:  [clean / hexagonal]
+? Architecture pattern:  [clean / hexagonal / ddd / vertical / standard]
 ? Database:              [postgres / mongo / none]
+? Message Broker:        [kafka / rabbitmq / nats / none]
+? Transport Protocol:    [http / grpc / both]
 ? Include Redis?         (y/N)
-? Include Docker setup?  (Y/n)
-? Include Kubernetes?    (y/N)
+? Include Docker & Docker Compose setup? (Y/n)
+? Include Kubernetes manifests (Deployment, Service, etc.)? (y/N)
 ? Include Helm charts?   (y/N)
 ? Cloud provider:        [aws / gcp / none]
 ? CI/CD provider:        [github / gitlab / none]
@@ -150,6 +152,8 @@ You'll see an interactive interface like this:
   Module:   github.com/acme/order-service
   Arch:     clean
   DB:       postgres
+  Broker:   kafka
+  Transp:   both
   Redis:    false
   Docker:   true
   K8s:      false
@@ -158,7 +162,7 @@ You'll see an interactive interface like this:
   CI:       github
   Output:   ./order-service
 
-? Generate service with these settings? (Y/n) Y
+? Generate service with these settings? Yes
 
 🚀 Generating order-service ...
 ```
