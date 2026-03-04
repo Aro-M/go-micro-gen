@@ -1,0 +1,88 @@
+package main
+
+import (
+	"context"
+	"log/slog"
+{{- if or (hasDB .Database) (hasBroker .Broker) (eq .Cloud "aws")}}
+	"os"
+{{- end}}
+
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	httpadapter "github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
+
+	"{{.ModulePath}}/internal/config"
+	"{{.ModulePath}}/{{.Arch.Service}}"
+{{- if hasDB .Database}}
+	"{{.ModulePath}}/{{.Arch.Repository}}/{{.Database}}"
+{{- end}}
+{{- if hasBroker .Broker}}
+	"{{.ModulePath}}/internal/broker/{{.Broker}}"
+	"{{.ModulePath}}/internal/worker"
+{{- end}}
+{{- if isHTTP .Transport}}
+	"{{.ModulePath}}/{{.Arch.Transport}}/httpx"
+{{- end}}
+	"{{.ModulePath}}/pkg/logger"
+)
+
+var httpLambda *httpadapter.HandlerAdapter
+
+func init() {
+	cfg := config.MustLoad()
+	log := logger.New(cfg.LogLevel)
+	slog.SetDefault(log)
+
+{{- if eq .Cloud "aws"}}
+	// Initialize AWS
+	_, err := config.InitAWS(context.Background(), log)
+	if err != nil {
+		slog.Error("failed to initialize AWS", "error", err)
+		os.Exit(1)
+	}
+{{- end}}
+
+{{- if hasDB .Database}}
+	repo, err := {{.Database}}.NewRepository(cfg)
+	if err != nil {
+		slog.Error("failed to connect to database", "error", err)
+		os.Exit(1)
+	}
+	svc := service.New(repo, log)
+{{- else}}
+	svc := service.New(log)
+{{- end}}
+
+{{- if hasBroker .Broker}}
+	brokerClient, err := {{.Broker}}.NewClient(cfg, log)
+	if err != nil {
+		slog.Error("failed to connect to message broker", "error", err)
+		os.Exit(1)
+	}
+	wrk := worker.New(brokerClient, svc, log)
+	go func() {
+		if err := wrk.Start(context.Background()); err != nil {
+			slog.Error("worker stopped with error", "error", err)
+		}
+	}()
+{{- end}}
+
+{{- if isHTTP .Transport}}
+	router := httpx.NewRouter(cfg, svc, log)
+	httpLambda = httpadapter.New(router)
+{{- else}}
+	log.Error("AWS Lambda scaffolding currently only supports routing HTTP traffic via API Gateway.")
+{{- end}}
+}
+
+// Handler handles the AWS Lambda execution by proxying events to Go-chi.
+func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	if httpLambda == nil {
+		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+	}
+	return httpLambda.ProxyWithContext(ctx, req)
+}
+
+func main() {
+	lambda.Start(Handler)
+}

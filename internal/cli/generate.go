@@ -13,28 +13,30 @@ import (
 )
 
 var (
-	flagName       string
-	flagModule     string
-	flagDB         string
-	flagBroker     string
-	flagTransport  string
-	flagArch       string
-	flagCI         string
-	flagRedis      bool
-	flagRedisSet   bool
-	flagGraphQL    bool
-	flagGraphQLSet bool
-	flagJWT        bool
-	flagJWTSet     bool
-	flagDocker     bool
-	flagDockerSet  bool
-	flagK8s        bool
-	flagK8sSet     bool
-	flagHelm       bool
-	flagHelmSet    bool
-	flagCloud      string
-	flagOutput     string
-	flagYes        bool // skip confirmation prompt (for CI / scripted usage)
+	flagName          string
+	flagModule        string
+	flagDB            string
+	flagBroker        string
+	flagTransport     string
+	flagArch          string
+	flagCI            string
+	flagRedis         bool
+	flagRedisSet      bool
+	flagGraphQL       bool
+	flagGraphQLSet    bool
+	flagJWT           bool
+	flagJWTSet        bool
+	flagServerless    bool
+	flagServerlessSet bool
+	flagDocker        bool
+	flagDockerSet     bool
+	flagK8s           bool
+	flagK8sSet        bool
+	flagHelm          bool
+	flagHelmSet       bool
+	flagCloud         string
+	flagOutput        string
+	flagYes           bool // skip confirmation prompt (for CI / scripted usage)
 )
 
 var generateCmd = &cobra.Command{
@@ -56,6 +58,7 @@ func init() {
 	generateCmd.Flags().BoolVar(&flagRedis, "redis", false, "Include Redis")
 	generateCmd.Flags().BoolVar(&flagGraphQL, "graphql", false, "Include GraphQL endpoint")
 	generateCmd.Flags().BoolVar(&flagJWT, "jwt", false, "Include JWT Auth Middleware")
+	generateCmd.Flags().BoolVar(&flagServerless, "serverless", false, "Include Serverless deployment wrappers")
 	generateCmd.Flags().BoolVar(&flagDocker, "docker", false, "Include Docker setup")
 	generateCmd.Flags().BoolVar(&flagK8s, "k8s", false, "Include Kubernetes manifests")
 	generateCmd.Flags().BoolVar(&flagHelm, "helm", false, "Include Helm charts")
@@ -67,6 +70,7 @@ func init() {
 		flagRedisSet = generateCmd.Flags().Changed("redis")
 		flagGraphQLSet = generateCmd.Flags().Changed("graphql")
 		flagJWTSet = generateCmd.Flags().Changed("jwt")
+		flagServerlessSet = generateCmd.Flags().Changed("serverless")
 		flagDockerSet = generateCmd.Flags().Changed("docker")
 		flagK8sSet = generateCmd.Flags().Changed("k8s")
 		flagHelmSet = generateCmd.Flags().Changed("helm")
@@ -104,6 +108,9 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if err := askJWT(cfg); err != nil {
+		return err
+	}
+	if err := askServerless(cfg); err != nil {
 		return err
 	}
 	if err := askDocker(cfg); err != nil {
@@ -292,6 +299,23 @@ func askJWT(cfg *config.ServiceConfig) error {
 	return nil
 }
 
+func askServerless(cfg *config.ServiceConfig) error {
+	if flagServerlessSet {
+		cfg.IncludeServerless = flagServerless
+		return nil
+	}
+	var res bool
+	prompt := &survey.Confirm{
+		Message: "Support Serverless deployment? (AWS Lambda / GCP Functions)",
+		Default: false,
+	}
+	if err := survey.AskOne(prompt, &res); err != nil {
+		return err
+	}
+	cfg.IncludeServerless = res
+	return nil
+}
+
 func askDocker(cfg *config.ServiceConfig) error {
 	if flagDockerSet {
 		cfg.IncludeDocker = flagDocker
@@ -384,6 +408,9 @@ func printSummary(cfg *config.ServiceConfig) {
 	fmt.Printf("  %s  %v\n", bold("K8s:    "), cfg.IncludeK8s)
 	fmt.Printf("  %s  %v\n", bold("Helm:   "), cfg.IncludeHelm)
 	fmt.Printf("  %s  %s\n", bold("Cloud:  "), cfg.Cloud)
+	if cfg.IncludeServerless {
+		fmt.Printf("  %s  %s\n", bold("S-less: "), color.CyanString("true"))
+	}
 	fmt.Printf("  %s  %s\n", bold("CI:     "), cfg.CI)
 	fmt.Printf("  %s  %s\n", bold("Output: "), cfg.OutputDir)
 	fmt.Println()

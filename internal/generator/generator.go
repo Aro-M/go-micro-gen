@@ -148,6 +148,17 @@ func (g *Generator) shouldInclude(tmplPath string) bool {
 		return false
 	}
 
+	// Serverless Templates
+	isAWS := g.cfg.Cloud == config.CloudAWS
+	isGCP := g.cfg.Cloud == config.CloudGCP
+
+	if strings.Contains(tmplPath, "/cmd/lambda/") && (!g.cfg.IncludeServerless || !isAWS) {
+		return false
+	}
+	if strings.Contains(tmplPath, "/cmd/cloudfunction/") && (!g.cfg.IncludeServerless || !isGCP) {
+		return false
+	}
+
 	// Infra templates (Docker, K8s, Helm)
 	if strings.Contains(tmplPath, "docker/") && !g.cfg.IncludeDocker {
 		return false

@@ -121,6 +121,8 @@ type ServiceConfig struct {
 	IncludeGraphQL bool
 	// Whether to include JWT Auth Middleware
 	IncludeJWT bool
+	// Whether to include Serverless wrappers
+	IncludeServerless bool
 	// Whether to include Docker assets
 	IncludeDocker bool
 	// Whether to include K8s

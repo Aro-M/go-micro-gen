@@ -1,0 +1,71 @@
+package cloudfunction
+
+import (
+	"context"
+	"log/slog"
+{{- if or (hasDB .Database) (hasBroker .Broker) (eq .Cloud "gcp")}}
+	"os"
+{{- end}}
+
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
+
+	"{{.ModulePath}}/internal/config"
+	"{{.ModulePath}}/{{.Arch.Service}}"
+{{- if hasDB .Database}}
+	"{{.ModulePath}}/{{.Arch.Repository}}/{{.Database}}"
+{{- end}}
+{{- if hasBroker .Broker}}
+	"{{.ModulePath}}/internal/broker/{{.Broker}}"
+	"{{.ModulePath}}/internal/worker"
+{{- end}}
+{{- if isHTTP .Transport}}
+	"{{.ModulePath}}/{{.Arch.Transport}}/httpx"
+{{- end}}
+	"{{.ModulePath}}/pkg/logger"
+)
+
+func init() {
+	cfg := config.MustLoad()
+	log := logger.New(cfg.LogLevel)
+	slog.SetDefault(log)
+
+{{- if eq .Cloud "gcp"}}
+	_, err := config.InitGCP(context.Background(), log)
+	if err != nil {
+		slog.Error("failed to initialize GCP", "error", err)
+		os.Exit(1)
+	}
+{{- end}}
+
+{{- if hasDB .Database}}
+	repo, err := {{.Database}}.NewRepository(cfg)
+	if err != nil {
+		slog.Error("failed to connect to database", "error", err)
+		os.Exit(1)
+	}
+	svc := service.New(repo, log)
+{{- else}}
+	svc := service.New(log)
+{{- end}}
+
+{{- if hasBroker .Broker}}
+	brokerClient, err := {{.Broker}}.NewClient(cfg, log)
+	if err != nil {
+		slog.Error("failed to connect to message broker", "error", err)
+		os.Exit(1)
+	}
+	wrk := worker.New(brokerClient, svc, log)
+	go func() {
+		if err := wrk.Start(context.Background()); err != nil {
+			slog.Error("worker stopped with error", "error", err)
+		}
+	}()
+{{- end}}
+
+{{- if isHTTP .Transport}}
+	router := httpx.NewRouter(cfg, svc, log)
+	functions.HTTP("EntryPoint", router.ServeHTTP)
+{{- else}}
+	log.Error("Cloud Function scaffolding currently only supports HTTP transport.")
+{{- end}}
+}
