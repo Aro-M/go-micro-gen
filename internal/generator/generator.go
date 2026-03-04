@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"text/template"
 
 	"github.com/Aro-M/go-micro-gen/internal/config"
+	"github.com/fatih/color"
 )
 
 // templateFS is set by the main package (via SetTemplateFS) using go:embed.
@@ -43,7 +45,7 @@ func (g *Generator) Generate() error {
 
 	// 2. Walk all templates and render applicable ones
 	// Note: templateFS is already sub'd to the templates root, so we walk "."
-	return fs.WalkDir(templateFS, ".", func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(templateFS, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -58,6 +60,23 @@ func (g *Generator) Generate() error {
 
 		return g.renderTemplate(path)
 	})
+	if err != nil {
+		return err
+	}
+
+	// Post-generation steps
+	if err := g.runGoMod(g.cfg.OutputDir); err != nil {
+		color.Red("❌ Failed to initialize Go module: %v", err)
+	}
+
+	if g.cfg.IncludeGraphQL {
+		color.Cyan("\n⚙️  Generating GraphQL code via gqlgen...")
+		if err := g.runGqlgen(g.cfg.OutputDir); err != nil {
+			color.Red("❌ Failed to generate GraphQL code: %v", err)
+		}
+	}
+
+	return nil
 }
 
 // shouldInclude decides whether a template file should be rendered
@@ -226,4 +245,32 @@ func templateFuncs() template.FuncMap {
 		"isHTTP":     func(t config.TransportType) bool { return t == config.TransportHTTP || t == config.TransportBoth },
 		"isGRPC":     func(t config.TransportType) bool { return t == config.TransportGRPC || t == config.TransportBoth },
 	}
+}
+
+func (g *Generator) runGoMod(dir string) error {
+	cmdTidy := exec.Command("go", "mod", "tidy")
+	cmdTidy.Dir = dir
+	_ = cmdTidy.Run() // ignore error, some imports might need generation first
+	return nil
+}
+
+func (g *Generator) runGqlgen(dir string) error {
+	cmdTidy := exec.Command("go", "mod", "tidy")
+	cmdTidy.Dir = dir
+	if err := cmdTidy.Run(); err != nil {
+		fmt.Printf("⚠️  Go mod tidy warning: %v\n", err)
+	}
+
+	cmdGql := exec.Command("go", "run", "github.com/99designs/gqlgen", "generate")
+	cmdGql.Dir = dir
+	out, err := cmdGql.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("gqlgen failed: %v\nOutput: %s", err, string(out))
+	}
+
+	cmdFmt := exec.Command("go", "fmt", "./...")
+	cmdFmt.Dir = dir
+	_ = cmdFmt.Run()
+
+	return nil
 }

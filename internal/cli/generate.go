@@ -13,24 +13,26 @@ import (
 )
 
 var (
-	flagName      string
-	flagModule    string
-	flagDB        string
-	flagBroker    string
-	flagTransport string
-	flagArch      string
-	flagCI        string
-	flagRedis     bool
-	flagRedisSet  bool
-	flagDocker    bool
-	flagDockerSet bool
-	flagK8s       bool
-	flagK8sSet    bool
-	flagHelm      bool
-	flagHelmSet   bool
-	flagCloud     string
-	flagOutput    string
-	flagYes       bool // skip confirmation prompt (for CI / scripted usage)
+	flagName       string
+	flagModule     string
+	flagDB         string
+	flagBroker     string
+	flagTransport  string
+	flagArch       string
+	flagCI         string
+	flagRedis      bool
+	flagRedisSet   bool
+	flagGraphQL    bool
+	flagGraphQLSet bool
+	flagDocker     bool
+	flagDockerSet  bool
+	flagK8s        bool
+	flagK8sSet     bool
+	flagHelm       bool
+	flagHelmSet    bool
+	flagCloud      string
+	flagOutput     string
+	flagYes        bool // skip confirmation prompt (for CI / scripted usage)
 )
 
 var generateCmd = &cobra.Command{
@@ -50,6 +52,7 @@ func init() {
 	generateCmd.Flags().StringVar(&flagCI, "ci", "", "CI/CD: github | gitlab | none")
 	generateCmd.Flags().StringVar(&flagCloud, "cloud", "", "Cloud Provider: aws | gcp | none")
 	generateCmd.Flags().BoolVar(&flagRedis, "redis", false, "Include Redis")
+	generateCmd.Flags().BoolVar(&flagGraphQL, "graphql", false, "Include GraphQL endpoint")
 	generateCmd.Flags().BoolVar(&flagDocker, "docker", false, "Include Docker setup")
 	generateCmd.Flags().BoolVar(&flagK8s, "k8s", false, "Include Kubernetes manifests")
 	generateCmd.Flags().BoolVar(&flagHelm, "helm", false, "Include Helm charts")
@@ -59,6 +62,7 @@ func init() {
 	generateCmd.PreRun = func(cmd *cobra.Command, args []string) {
 		// Check if flags were explicitly set
 		flagRedisSet = generateCmd.Flags().Changed("redis")
+		flagGraphQLSet = generateCmd.Flags().Changed("graphql")
 		flagDockerSet = generateCmd.Flags().Changed("docker")
 		flagK8sSet = generateCmd.Flags().Changed("k8s")
 		flagHelmSet = generateCmd.Flags().Changed("helm")
@@ -90,6 +94,9 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if err := askRedis(cfg); err != nil {
+		return err
+	}
+	if err := askGraphQL(cfg); err != nil {
 		return err
 	}
 	if err := askDocker(cfg); err != nil {
@@ -225,10 +232,40 @@ func askRedis(cfg *config.ServiceConfig) error {
 		cfg.IncludeRedis = flagRedis
 		return nil
 	}
-	return survey.AskOne(&survey.Confirm{
+	var res bool
+	prompt := &survey.Confirm{
 		Message: "Include Redis?",
 		Default: false,
-	}, &cfg.IncludeRedis)
+	}
+	if err := survey.AskOne(prompt, &res); err != nil {
+		return err
+	}
+	cfg.IncludeRedis = res
+	return nil
+}
+
+func askGraphQL(cfg *config.ServiceConfig) error {
+	if flagGraphQLSet {
+		cfg.IncludeGraphQL = flagGraphQL
+	} else {
+		var res bool
+		prompt := &survey.Confirm{
+			Message: "Include GraphQL endpoint?",
+			Default: false,
+		}
+		if err := survey.AskOne(prompt, &res); err != nil {
+			return err
+		}
+		cfg.IncludeGraphQL = res
+	}
+
+	// Validate: GraphQL requires HTTP
+	if cfg.IncludeGraphQL && cfg.Transport == config.TransportGRPC {
+		color.Yellow("\n⚠️  GraphQL requires HTTP transport. Automatically switching Transport to 'both' (HTTP + gRPC).")
+		cfg.Transport = config.TransportBoth
+	}
+
+	return nil
 }
 
 func askDocker(cfg *config.ServiceConfig) error {
@@ -315,8 +352,9 @@ func printSummary(cfg *config.ServiceConfig) {
 	fmt.Printf("  %s  %s\n", bold("Arch:   "), cfg.Architecture)
 	fmt.Printf("  %s  %s\n", bold("DB:     "), cfg.Database)
 	fmt.Printf("  %s  %s\n", bold("Broker: "), cfg.Broker)
-	fmt.Printf("  %s  %s\n", bold("Transp: "), cfg.Transport)
-	fmt.Printf("  %s  %v\n", bold("Redis:  "), cfg.IncludeRedis)
+	fmt.Printf("  Transp:   %s\n", color.CyanString(string(cfg.Transport)))
+	fmt.Printf("  GraphQL:  %s\n", color.CyanString(fmt.Sprintf("%t", cfg.IncludeGraphQL)))
+	fmt.Printf("  Redis:    %s\n", color.CyanString(fmt.Sprintf("%t", cfg.IncludeRedis)))
 	fmt.Printf("  %s  %v\n", bold("Docker: "), cfg.IncludeDocker)
 	fmt.Printf("  %s  %v\n", bold("K8s:    "), cfg.IncludeK8s)
 	fmt.Printf("  %s  %v\n", bold("Helm:   "), cfg.IncludeHelm)

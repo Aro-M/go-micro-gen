@@ -117,6 +117,8 @@ type ServiceConfig struct {
 	Transport TransportType
 	// Whether to include Redis
 	IncludeRedis bool
+	// Whether to include GraphQL endpoint
+	IncludeGraphQL bool
 	// Whether to include Docker assets
 	IncludeDocker bool
 	// Whether to include K8s

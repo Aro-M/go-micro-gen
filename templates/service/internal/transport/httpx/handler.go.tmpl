@@ -10,6 +10,11 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"{{.ModulePath}}/{{.Arch.Domain}}"
 	"{{.ModulePath}}/{{.Arch.Service}}"
+{{- if .IncludeGraphQL}}
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"{{.ModulePath}}/graph"
+{{- end}}
 )
 
 // Handler holds all HTTP handler dependencies.
@@ -44,6 +49,16 @@ func NewRouter(svc *service.Service, log *slog.Logger) http.Handler {
 
 	// Register all routes
 	h.registerRoutes(r)
+
+{{- if .IncludeGraphQL}}
+	// GraphQL endpoints
+	graphqlSrv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+		Svc: svc,
+	}}))
+	r.Handle("/query", graphqlSrv)
+	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	log.Info("GraphQL playground enabled at /")
+{{- end}}
 
 	// Wrap the entire router with OpenTelemetry HTTP instrumentation
 	return otelhttp.NewHandler(r, "{{.ServiceName}}")

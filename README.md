@@ -286,7 +286,7 @@ order-service/
 ## Roadmap & Future Ideas
 
 - [ ] **Interactive Web UI (`go-micro-gen ui`)** — A visual dashboard to configure and generate services.
-- [ ] **GraphQL Support** — Scaffolding for `gqlgen` to build GraphQL endpoints alongside REST/gRPC.
+- [x] **GraphQL Support** — Scaffolding for `gqlgen` to build GraphQL endpoints alongside REST/gRPC.
 - [ ] **Event-Driven Workers** — Pre-configured consumers/listeners for Kafka and RabbitMQ.
 - [ ] **JWT Auth Middleware** — Out-of-the-box authentication & role-based authorization injected into transports.
 - [ ] **Serverless Scaffolding** — Generate AWS Lambda / GCP Cloud Functions entrypoints from the same logic.
