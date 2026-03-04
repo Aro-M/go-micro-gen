@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"net"
 {{- if isHTTP .Transport}}
 	"net/http"
 {{- end}}
 	"os"
 	"os/signal"
 	"syscall"
+{{- if isHTTP .Transport}}
 	"time"
+{{- end}}
 
 	"{{.ModulePath}}/internal/config"
 	"{{.ModulePath}}/{{.Arch.Service}}"
@@ -22,12 +23,16 @@ import (
 	"{{.ModulePath}}/{{.Arch.Transport}}/httpx"
 {{- end}}
 {{- if isGRPC .Transport}}
+	"net"
+
 	"{{.ModulePath}}/{{.Arch.Transport}}/grpc"
 {{- end}}
 {{- if hasBroker .Broker}}
 	"{{.ModulePath}}/internal/broker/{{.Broker}}"
 {{- end}}
+{{- if isHTTP .Transport}}
 	"{{.ModulePath}}/pkg/health"
+{{- end}}
 	"{{.ModulePath}}/pkg/logger"
 	"{{.ModulePath}}/pkg/telemetry"
 )
