@@ -47,11 +47,11 @@ DOWNLOAD_URL="https://github.com/${REPO}/releases/download/${LATEST_RELEASE}/${F
 
 # Check for write permissions to /usr/local/bin
 INSTALL_DIR="/usr/local/bin"
-SUDO=""
+
 if [ "$OS" != "windows" ]; then
     if [ ! -w "$INSTALL_DIR" ]; then
-        echo "💡 Sudo privileges required to install to $INSTALL_DIR (you may be asked for password)"
-        SUDO="sudo"
+        INSTALL_DIR="$HOME/.local/bin"
+        mkdir -p "$INSTALL_DIR"
     fi
 fi
 
@@ -67,7 +67,14 @@ if [ "$OS" == "windows" ]; then
 else
     echo "📦 Setting executable permissions and moving to $INSTALL_DIR..."
     chmod +x "$FILENAME"
-    $SUDO mv "$FILENAME" "$INSTALL_DIR/$BINARY_NAME"
+    mv "$FILENAME" "$INSTALL_DIR/$BINARY_NAME"
+    
+    # Check if INSTALL_DIR is in PATH
+    if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
+        echo "⚠️  WARNING: $INSTALL_DIR is not in your PATH."
+        echo "👉 Add this line to your ~/.bashrc or ~/.zshrc:"
+        echo "   export PATH=\$PATH:$INSTALL_DIR"
+    fi
 fi
 
 echo "✅ Successfully installed! Run 'go-micro-gen --help' to get started."
