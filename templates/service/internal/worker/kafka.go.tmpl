@@ -1,0 +1,68 @@
+package worker
+
+import (
+	"context"
+
+	"github.com/IBM/sarama"
+)
+
+// Start initiates the Kafka consumer loop.
+func (w *Worker) Start(ctx context.Context) error {
+	w.log.Info("starting Kafka worker", "topic", "example-events")
+
+	// Set up the sarama consumer group handler
+	handler := &exampleConsumerGroupHandler{w: w}
+
+	// Consumer loop for a specific topic
+	topics := []string{"example-events"}
+	
+	// Create a new Go routine for the consumer loop so Start() returns.
+	go func() {
+		for {
+			// Consume blocks until ctx is canceled or rebalancing occurs.
+			if err := w.client.ConsumerGroup().Consume(ctx, topics, handler); err != nil {
+				w.log.Error("error from kafka consumer", "error", err)
+			}
+			// Check if context was cancelled
+			if ctx.Err() != nil {
+				return
+			}
+		}
+	}()
+
+	return nil
+}
+
+type exampleConsumerGroupHandler struct {
+	w *Worker
+}
+
+func (h *exampleConsumerGroupHandler) Setup(sarama.ConsumerGroupSession) error   { return nil }
+func (h *exampleConsumerGroupHandler) Cleanup(sarama.ConsumerGroupSession) error { return nil }
+
+func (h *exampleConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	for {
+		select {
+		case message, ok := <-claim.Messages():
+			if !ok {
+				// Channel closed
+				return nil
+			}
+			
+			h.w.log.Info("kafka message received", 
+				"topic", message.Topic, 
+				"partition", message.Partition, 
+				"offset", message.Offset,
+				"key", string(message.Key),
+			)
+			
+			// Process the message using h.w.svc here!
+
+			// Mark message as processed
+			session.MarkMessage(message, "")
+			
+		case <-session.Context().Done():
+			return nil
+		}
+	}
+}

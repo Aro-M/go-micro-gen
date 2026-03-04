@@ -1,0 +1,31 @@
+package worker
+
+import (
+	"context"
+
+	"github.com/nats-io/nats.go"
+)
+
+// Start initiates the NATS consumer loop.
+func (w *Worker) Start(ctx context.Context) error {
+	subject := "example.*"
+	w.log.Info("starting NATS worker", "subject", subject)
+
+	sub, err := w.client.Conn().Subscribe(subject, func(m *nats.Msg) {
+		w.log.Info("nats message received", "subject", m.Subject)
+		
+		// Process the message using w.svc here!
+	})
+	if err != nil {
+		return err
+	}
+
+	// Listen for context cancellation to unsubscribe cleanly
+	go func() {
+		<-ctx.Done()
+		w.log.Info("stopping nats worker")
+		sub.Unsubscribe()
+	}()
+
+	return nil
+}

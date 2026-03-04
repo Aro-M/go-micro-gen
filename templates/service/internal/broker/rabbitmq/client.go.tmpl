@@ -3,22 +3,48 @@ package rabbitmq
 import (
 	"log/slog"
 
+	amqp "github.com/rabbitmq/amqp091-go"
 	"{{.ModulePath}}/internal/config"
 )
 
-// Client represents a dummy RabbitMQ connection.
 type Client struct {
-	log *slog.Logger
+	conn    *amqp.Connection
+	channel *amqp.Channel
+	log     *slog.Logger
 }
 
-// NewClient initializes a connection to RabbitMQ.
 func NewClient(cfg *config.Config, log *slog.Logger) (*Client, error) {
-	log.Info("connecting to RabbitMQ", "broker", "amqp://guest:guest@localhost:5672/")
-	return &Client{log: log}, nil
+	url := cfg.BrokerURL
+	if url == "" {
+		url = "amqp://guest:guest@localhost:5672/"
+	}
+
+	conn, err := amqp.Dial(url)
+	if err != nil {
+		return nil, err
+	}
+
+	ch, err := conn.Channel()
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+
+	log.Info("connected to RabbitMQ", "url", url)
+
+	return &Client{
+		conn:    conn,
+		channel: ch,
+		log:     log,
+	}, nil
 }
 
-// Close closes the RabbitMQ connection.
+func (c *Client) Channel() *amqp.Channel {
+	return c.channel
+}
+
 func (c *Client) Close() error {
 	c.log.Info("closing RabbitMQ connection")
-	return nil
+	c.channel.Close()
+	return c.conn.Close()
 }

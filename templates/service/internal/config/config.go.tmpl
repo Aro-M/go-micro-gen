@@ -21,6 +21,17 @@ type Config struct {
 	// OpenTelemetry
 	OTELEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT" env-default:"otel-collector:4317"`
 
+{{- if hasBroker .Broker}}
+	// Message Broker
+{{- if isKafka .Broker}}
+	BrokerURL string `env:"KAFKA_BROKERS" env-default:"localhost:9092"`
+{{- else if isRabbitMQ .Broker}}
+	BrokerURL string `env:"RABBITMQ_URL" env-default:"amqp://guest:guest@localhost:5672/"`
+{{- else if isNATS .Broker}}
+	BrokerURL string `env:"NATS_URL" env-default:"nats://localhost:4222"`
+{{- end}}
+{{- end}}
+
 {{- if isPostgres .Database}}
 	// PostgreSQL
 	DBHost     string `env:"DB_HOST" env-required:"true"`

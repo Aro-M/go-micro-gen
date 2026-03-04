@@ -106,6 +106,22 @@ func (g *Generator) shouldInclude(tmplPath string) bool {
 		return false
 	}
 
+	// Worker templates
+	if strings.Contains(tmplPath, "/worker/") {
+		if g.cfg.Broker == config.BrokerNone || g.cfg.Broker == "" {
+			return false
+		}
+		if strings.Contains(tmplPath, "kafka") && g.cfg.Broker != config.BrokerKafka {
+			return false
+		}
+		if strings.Contains(tmplPath, "rabbitmq") && g.cfg.Broker != config.BrokerRabbitMQ {
+			return false
+		}
+		if strings.Contains(tmplPath, "nats") && g.cfg.Broker != config.BrokerNATS {
+			return false
+		}
+	}
+
 	// Cloud-specific templates
 	if strings.Contains(tmplPath, "config/aws.go") && g.cfg.Cloud != config.CloudAWS {
 		return false
@@ -119,6 +135,11 @@ func (g *Generator) shouldInclude(tmplPath string) bool {
 		return false
 	}
 	if strings.Contains(tmplPath, "/transport/httpx/") && g.cfg.Transport == config.TransportGRPC {
+		return false
+	}
+
+	// GraphQL templates
+	if !g.cfg.IncludeGraphQL && (strings.Contains(tmplPath, "/graph/") || strings.HasSuffix(tmplPath, "gqlgen.yml.tmpl") || strings.HasSuffix(tmplPath, "tools.go.tmpl")) {
 		return false
 	}
 

@@ -1,0 +1,24 @@
+package worker
+
+import (
+	"log/slog"
+
+	"{{.ModulePath}}/internal/broker/{{.Broker}}"
+	"{{.ModulePath}}/{{.Arch.Service}}"
+)
+
+// Worker represents the background event listener structure.
+type Worker struct {
+	client *{{.Broker}}.Client
+	svc    *service.Service
+	log    *slog.Logger
+}
+
+// New creates a new background worker.
+func New(client *{{.Broker}}.Client, svc *service.Service, log *slog.Logger) *Worker {
+	return &Worker{
+		client: client,
+		svc:    svc,
+		log:    log,
+	}
+}

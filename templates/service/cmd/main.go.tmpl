@@ -29,6 +29,7 @@ import (
 {{- end}}
 {{- if hasBroker .Broker}}
 	"{{.ModulePath}}/internal/broker/{{.Broker}}"
+	"{{.ModulePath}}/internal/worker"
 {{- end}}
 {{- if isHTTP .Transport}}
 	"{{.ModulePath}}/pkg/health"
@@ -98,6 +99,17 @@ func main() {
 		os.Exit(1)
 	}
 	defer brokerClient.Close()
+
+	// Initialize Event Workers
+	wrk := worker.New(brokerClient, svc, log)
+	workerCtx, workerCancel := context.WithCancel(context.Background())
+	defer workerCancel()
+
+	go func() {
+		if err := wrk.Start(workerCtx); err != nil {
+			slog.Error("worker stopped with error", "error", err)
+		}
+	}()
 {{- end}}
 
 {{- if isHTTP .Transport}}
@@ -150,6 +162,11 @@ func main() {
 	<-quit
 
 	slog.Info("shutting down gracefully...")
+
+{{- if hasBroker .Broker}}
+	// Signal workers to stop and allow ongoing events to finish
+	workerCancel()
+{{- end}}
 {{- if isHTTP .Transport}}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()

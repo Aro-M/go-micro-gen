@@ -2,23 +2,59 @@ package kafka
 
 import (
 	"log/slog"
+	"strings"
 
+	"github.com/IBM/sarama"
 	"{{.ModulePath}}/internal/config"
 )
 
-// Client represents a dummy Kafka connection.
 type Client struct {
-	log *slog.Logger
+	producer sarama.SyncProducer
+	consumer sarama.ConsumerGroup
+	log      *slog.Logger
 }
 
-// NewClient initializes a connection to Kafka.
 func NewClient(cfg *config.Config, log *slog.Logger) (*Client, error) {
-	log.Info("connecting to Kafka", "broker", "localhost:9092")
-	return &Client{log: log}, nil
+	brokers := strings.Split(cfg.BrokerURL, ",")
+	if len(brokers) == 1 && brokers[0] == "" {
+		brokers = []string{"localhost:9092"}
+	}
+
+	kc := sarama.NewConfig()
+	kc.Producer.Return.Successes = true
+	// Start consuming from the oldest offset by default
+	kc.Consumer.Offsets.Initial = sarama.OffsetOldest
+
+	producer, err := sarama.NewSyncProducer(brokers, kc)
+	if err != nil {
+		return nil, err
+	}
+
+	consumer, err := sarama.NewConsumerGroup(brokers, "{{.ServiceName}}-group", kc)
+	if err != nil {
+		producer.Close()
+		return nil, err
+	}
+
+	log.Info("connected to Kafka", "brokers", brokers)
+
+	return &Client{
+		producer: producer,
+		consumer: consumer,
+		log:      log,
+	}, nil
 }
 
-// Close closes the Kafka connection.
+func (c *Client) Producer() sarama.SyncProducer {
+	return c.producer
+}
+
+func (c *Client) ConsumerGroup() sarama.ConsumerGroup {
+	return c.consumer
+}
+
 func (c *Client) Close() error {
 	c.log.Info("closing Kafka connection")
-	return nil
+	c.producer.Close()
+	return c.consumer.Close()
 }

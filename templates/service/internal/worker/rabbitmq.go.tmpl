@@ -1,0 +1,61 @@
+package worker
+
+import (
+	"context"
+)
+
+// Start initiates the RabbitMQ consumer loop.
+func (w *Worker) Start(ctx context.Context) error {
+	queueName := "example-queue"
+	w.log.Info("starting RabbitMQ worker", "queue", queueName)
+
+	// Ensure the queue exists before consuming
+	_, err := w.client.Channel().QueueDeclare(
+		queueName,
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	if err != nil {
+		return err
+	}
+
+	msgs, err := w.client.Channel().Consume(
+		queueName,
+		"",    // consumer
+		false, // auto-ack
+		false, // exclusive
+		false, // no-local
+		false, // no-wait
+		nil,   // args
+	)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		for {
+			select {
+			case d, ok := <-msgs:
+				if !ok {
+					w.log.Warn("rabbitmq channel closed")
+					return
+				}
+				
+				w.log.Info("rabbitmq message received", "routing_key", d.RoutingKey)
+
+				// Process the message using w.svc here!
+
+				// Acknowledge the message
+				d.Ack(false)
+			case <-ctx.Done():
+				w.log.Info("stopping rabbitmq worker")
+				return
+			}
+		}
+	}()
+
+	return nil
+}

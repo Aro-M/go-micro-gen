@@ -3,22 +3,40 @@ package nats
 import (
 	"log/slog"
 
+	"github.com/nats-io/nats.go"
 	"{{.ModulePath}}/internal/config"
 )
 
-// Client represents a dummy NATS connection.
 type Client struct {
-	log *slog.Logger
+	conn *nats.Conn
+	log  *slog.Logger
 }
 
-// NewClient initializes a connection to NATS.
 func NewClient(cfg *config.Config, log *slog.Logger) (*Client, error) {
-	log.Info("connecting to NATS", "broker", "nats://localhost:4222")
-	return &Client{log: log}, nil
+	url := cfg.BrokerURL
+	if url == "" {
+		url = nats.DefaultURL
+	}
+
+	nc, err := nats.Connect(url)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Info("connected to NATS", "url", url)
+
+	return &Client{
+		conn: nc,
+		log:  log,
+	}, nil
 }
 
-// Close closes the NATS connection.
+func (c *Client) Conn() *nats.Conn {
+	return c.conn
+}
+
 func (c *Client) Close() error {
 	c.log.Info("closing NATS connection")
+	c.conn.Close()
 	return nil
 }
