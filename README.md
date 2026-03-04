@@ -86,14 +86,23 @@ graph TD
 ### Method 1: Download Pre-Compiled Binaries (Recommended for Windows & macOS)
 You don't need Go installed! Just go to the [Releases page](https://github.com/Aro-M/go-micro-gen/releases) and download the `.exe` (Windows) or binary (macOS / Linux) specifically for your system. We automatically compile and publish AMD64 and ARM64 (Apple Silicon) versions on every release.
 
-### Method 1: `go install` (Easiest)
+### Method 1: Auto-Installer (Recommended 🌟)
 
-If you have Go installed, you can simply download and install the latest version globally:
+The easiest way to install `go-micro-gen` on macOS or Linux is to use our auto-installer script. It automatically detects your OS, downloads the pre-compiled binary, shows a **visual progress bar**, and places it in your path:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Aro-M/go-micro-gen/main/install.sh | bash
+```
+
+### Method 2: `go install` (For Go developers)
+
+If you have Go installed, you can simply download and compile the latest version globally:
 
 ```bash
 go install github.com/Aro-M/go-micro-gen@latest
 ```
 *(Note: If Go caches an older version, you can force a fresh download using `GOPROXY=direct go install github.com/Aro-M/go-micro-gen@latest`).*
+
 
 **✅ Troubleshooting `command not found`:**
 If your terminal says `go-micro-gen: command not found` after a successful installation, your Go bin directory is not in your `$PATH`. 
@@ -103,7 +112,7 @@ echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### Method 2: Build from source
+### Method 3: Build from source
 
 ```bash
 git clone https://github.com/Aro-M/go-micro-gen
