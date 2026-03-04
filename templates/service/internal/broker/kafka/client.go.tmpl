@@ -14,7 +14,7 @@ type Client struct {
 }
 
 // NewClient initializes a connection to Kafka.
-func NewClient(cfg *config.ServiceConfig, log *slog.Logger) (*Client, error) {
+func NewClient(cfg *config.Config, log *slog.Logger) (*Client, error) {
 	log.Info("connecting to Kafka", "broker", "localhost:9092")
 	return &Client{log: log}, nil
 }

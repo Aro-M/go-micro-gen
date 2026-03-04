@@ -23,7 +23,6 @@ import (
 {{- end}}
 {{- if isGRPC .Transport}}
 	"{{.ModulePath}}/{{.Arch.Transport}}/grpc"
-	grpc_lib "google.golang.org/grpc"
 {{- end}}
 {{- if hasBroker .Broker}}
 	"{{.ModulePath}}/internal/broker/{{.Broker}}"

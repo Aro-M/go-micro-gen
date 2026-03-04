@@ -14,7 +14,7 @@ type Client struct {
 }
 
 // NewClient initializes a connection to RabbitMQ.
-func NewClient(cfg *config.ServiceConfig, log *slog.Logger) (*Client, error) {
+func NewClient(cfg *config.Config, log *slog.Logger) (*Client, error) {
 	log.Info("connecting to RabbitMQ", "broker", "amqp://guest:guest@localhost:5672/")
 	return &Client{log: log}, nil
 }
