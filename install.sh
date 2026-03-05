@@ -69,6 +69,11 @@ else
     chmod +x "$FILENAME"
     mv "$FILENAME" "$INSTALL_DIR/$BINARY_NAME"
     
+    # macOS Gatekeeper bypass
+    if [ "$OS" == "darwin" ]; then
+        xattr -d com.apple.quarantine "$INSTALL_DIR/$BINARY_NAME" >/dev/null 2>&1 || true
+    fi
+    
     # Check if INSTALL_DIR is in PATH
     if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
         echo "⚠️  WARNING: $INSTALL_DIR is not in your PATH."

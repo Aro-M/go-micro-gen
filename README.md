@@ -26,7 +26,6 @@
 Unlike a simple "Hello World" generator, `go-micro-gen` sets up an **entire ecosystem** ensuring you follow industry best practices right from the start.
 
 ### ✨ Key Features
-- ✅ **Interactive Web UI** (`go-micro-gen ui`) for beautiful, visual scaffolding
 - ✅ **Multi-Architecture** layouts: Clean, Hexagonal, Domain-Driven Design (DDD), Vertical Slice, and Standard
 - ✅ **OpenTelemetry** (traces + metrics) pre-configured
 - ✅ **Cleanenv** configuration manager
@@ -145,15 +144,6 @@ go-micro-gen uninstall
 
 ## Quick Start
 
-### 🖥️ Interactive Web UI (Recommended)
-
-Generate your complete microservice infrastructure aesthetically! Rather than answering terminal prompts, `go-micro-gen` ships with a fully embedded, lightning-fast dark mode UI:
-
-```bash
-go-micro-gen ui
-```
-This automatically launches an ultra-light embedded GUI on your browser (`localhost:8080`) built 100% natively without Python/Node.js dependencies.
-
 ### 💻 Interactive CLI Mode
 
 Simply run the `generate` command and answer the prompts:
@@ -218,6 +208,16 @@ go-micro-gen generate \
   --helm=false \
   --output ./payment-service \
   --yes
+```
+
+### Adding Components Later
+
+If you've already generated a project and want to scaffold subsequent entities (e.g. adding a new business domain or handler), use the `add` command inside your project directory:
+
+```bash
+go-micro-gen add handler --name user
+go-micro-gen add service --name billing
+go-micro-gen add repository --name product
 ```
 
 ### Init Mode

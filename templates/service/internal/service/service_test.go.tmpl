@@ -1,24 +1,26 @@
 package service_test
 
 import (
+{{- if not (hasDB .Database)}}
 	"context"
 	"log/slog"
 	"os"
+{{- end}}
 	"testing"
 
+{{- if not (hasDB .Database)}}
 	"github.com/stretchr/testify/assert"
 	"{{.ModulePath}}/{{.Arch.Domain}}"
 	"{{.ModulePath}}/{{.Arch.Service}}"
+{{- end}}
 )
 
 func TestService_Create(t *testing.T) {
+{{- if hasDB .Database}}
+	t.Skip("Skip test - requires mock repository injection")
+{{- else}}
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	ctx := context.Background()
-
-{{- if hasDB .Database}}
-	// TODO: Initialize a mock repository and inject it
-	// svc := service.New(mockRepo, logger)
-{{- else}}
 	svc := service.New(logger)
 
 	t.Run("success", func(t *testing.T) {

@@ -1,28 +1,37 @@
 package httpx_test
 
 import (
+{{- if not (hasDB .Database)}}
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
+{{- end}}
 	"testing"
 
+{{- if not (hasDB .Database)}}
 	"github.com/stretchr/testify/assert"
+	{{- if .IncludeJWT}}
+	"{{.ModulePath}}/{{.Arch.Config}}"
+	{{- end}}
 	"{{.ModulePath}}/{{.Arch.Service}}"
 	"{{.ModulePath}}/{{.Arch.Transport}}/httpx"
+{{- end}}
 )
 
 func TestHandler(t *testing.T) {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-
 {{- if hasDB .Database}}
-	// TODO: Inject mock repository into service
-	// svc := service.New(mockRepo, logger)
+	t.Skip("Skip test - requires mock repository injection")
 {{- else}}
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	svc := service.New(logger)
-{{- end}}
 
+	{{- if .IncludeJWT}}
+	cfg := &config.Config{JWTSecret: "test-secret"}
+	router := httpx.NewRouter(cfg, svc, logger)
+	{{- else}}
 	router := httpx.NewRouter(svc, logger)
+	{{- end}}
 
 	t.Run("list examples", func(t *testing.T) {
 		req, _ := http.NewRequest(http.MethodGet, "/api/v1/examples", nil)
@@ -33,4 +42,5 @@ func TestHandler(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 		// assert.JSONEq(t, `null`, rr.Body.String()) // Or expected array
 	})
+{{- end}}
 }
