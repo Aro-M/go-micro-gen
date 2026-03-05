@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>go-micro-gen - Configuration</title>
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">G</div>
+                <span>go-micro-gen</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item active">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    New Service
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">Configuration / New Microservice</div>
+                <div class="progress-bar">
+                    <div class="progress-track"><div class="progress-fill"></div></div>
+                    <span class="progress-text">Step 1 of 1</span>
+                </div>
+            </header>
+            
+            <h1 class="page-title">Configure Your Microservice</h1>
+
+            <form id="generator-form" class="config-form">
+                <!-- Top Section -->
+                <div class="card">
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label for="name">Service Name</label>
+                            <span class="subtitle">e.g. user-analytics-service</span>
+                            <input type="text" id="name" name="name" required placeholder="user-analytics-service">
+                        </div>
+                        <div class="input-group">
+                            <label for="module">Module Path</label>
+                            <span class="subtitle">e.g. github.com/my-org/user-analytics</span>
+                            <input type="text" id="module" name="module" required placeholder="github.com/your-org/analytics">
+                        </div>
+                    </div>
+
+                    <div class="grid-3">
+                        <div class="input-group">
+                            <label for="db">Database</label>
+                            <div class="custom-select">
+                                <select id="db" name="db">
+                                    <option value="none">❌ None</option>
+                                    <option value="postgres">🐘 PostgreSQL</option>
+                                    <option value="mongo">🍃 MongoDB</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="broker">Message Broker</label>
+                            <div class="custom-select">
+                                <select id="broker" name="broker">
+                                    <option value="none">❌ None</option>
+                                    <option value="kafka">🎯 Kafka</option>
+                                    <option value="rabbitmq">🐇 RabbitMQ</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="cloud">Cloud Provider</label>
+                            <div class="custom-select">
+                                <select id="cloud" name="cloud">
+                                    <option value="none">❌ None</option>
+                                    <option value="aws">☁️ AWS</option>
+                                    <option value="gcp">🌐 GCP</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toggles Section -->
+                <div class="toggles-grid">
+                    <label class="toggle-card">
+                        <div class="toggle-info">
+                            <div class="toggle-icon serverless">⚡</div>
+                            <div>
+                                <h3>Serverless Deployment</h3>
+                                <p>Deploy as AWS Lambda or GCP Function</p>
+                            </div>
+                        </div>
+                        <div class="switch">
+                            <input type="checkbox" id="serverless" name="serverless">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+
+                    <label class="toggle-card">
+                        <div class="toggle-info">
+                            <div class="toggle-icon graphql">💠</div>
+                            <div>
+                                <h3>GraphQL API</h3>
+                                <p>Add robust GraphQL endpoint capabilities</p>
+                            </div>
+                        </div>
+                        <div class="switch">
+                            <input type="checkbox" id="graphql" name="graphql">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+
+                    <label class="toggle-card">
+                        <div class="toggle-info">
+                            <div class="toggle-icon jwt">🛡️</div>
+                            <div>
+                                <h3>JWT Authentication</h3>
+                                <p>Protect routes with token-based auth</p>
+                            </div>
+                        </div>
+                        <div class="switch">
+                            <input type="checkbox" id="jwt" name="jwt">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+
+                    <label class="toggle-card">
+                        <div class="toggle-info">
+                            <div class="toggle-icon seed">🌱</div>
+                            <div>
+                                <h3>Database Seeding</h3>
+                                <p>Generate mock data using gofakeit</p>
+                            </div>
+                        </div>
+                        <div class="switch">
+                            <input type="checkbox" id="seeding" name="seeding">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="action-footer">
+                    <button type="submit" class="generate-btn" id="generate-btn">
+                        <span>✨ Generate Microservice</span>
+                    </button>
+                    <div id="status-message" class="status-message"></div>
+                </div>
+            </form>
+        </main>
+    </div>
+    <script src="/script.js"></script>
+</body>
+</html>
