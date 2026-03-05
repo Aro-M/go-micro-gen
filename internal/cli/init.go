@@ -56,6 +56,18 @@ var initCmd = &cobra.Command{
 		if err := askTransport(cfg); err != nil {
 			return err
 		}
+		if err := askGraphQL(cfg); err != nil {
+			return err
+		}
+		if err := askJWT(cfg); err != nil {
+			return err
+		}
+		if err := askServerless(cfg); err != nil {
+			return err
+		}
+		if err := askSeeding(cfg); err != nil {
+			return err
+		}
 		if err := askRedis(cfg); err != nil {
 			return err
 		}
@@ -109,6 +121,10 @@ func init() {
 	initCmd.Flags().StringVar(&flagCI, "ci", "", "CI/CD: github | gitlab | none")
 	initCmd.Flags().StringVar(&flagCloud, "cloud", "", "Cloud Provider: aws | gcp | none")
 	initCmd.Flags().BoolVar(&flagRedis, "redis", false, "Include Redis")
+	initCmd.Flags().BoolVar(&flagGraphQL, "graphql", false, "Include GraphQL endpoint")
+	initCmd.Flags().BoolVar(&flagJWT, "jwt", false, "Include JWT Auth Middleware")
+	initCmd.Flags().BoolVar(&flagServerless, "serverless", false, "Include Serverless deployment wrappers")
+	initCmd.Flags().BoolVar(&flagSeeding, "seeding", false, "Include DB mock seeder wrappers")
 	initCmd.Flags().BoolVar(&flagDocker, "docker", false, "Include Docker setup")
 	initCmd.Flags().BoolVar(&flagK8s, "k8s", false, "Include Kubernetes manifests")
 	initCmd.Flags().BoolVar(&flagHelm, "helm", false, "Include Helm charts")
@@ -116,6 +132,10 @@ func init() {
 
 	initCmd.PreRun = func(cmd *cobra.Command, args []string) {
 		flagRedisSet = initCmd.Flags().Changed("redis")
+		flagGraphQLSet = initCmd.Flags().Changed("graphql")
+		flagJWTSet = initCmd.Flags().Changed("jwt")
+		flagServerlessSet = initCmd.Flags().Changed("serverless")
+		flagSeedingSet = initCmd.Flags().Changed("seeding")
 		flagDockerSet = initCmd.Flags().Changed("docker")
 		flagK8sSet = initCmd.Flags().Changed("k8s")
 		flagHelmSet = initCmd.Flags().Changed("helm")
