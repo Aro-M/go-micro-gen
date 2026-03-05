@@ -26,6 +26,7 @@
 Unlike a simple "Hello World" generator, `go-micro-gen` sets up an **entire ecosystem** ensuring you follow industry best practices right from the start.
 
 ### ✨ Key Features
+- ✅ **Interactive Web UI** (`go-micro-gen ui`) for beautiful, visual scaffolding
 - ✅ **Multi-Architecture** layouts: Clean, Hexagonal, Domain-Driven Design (DDD), Vertical Slice, and Standard
 - ✅ **OpenTelemetry** (traces + metrics) pre-configured
 - ✅ **Cleanenv** configuration manager
@@ -35,6 +36,10 @@ Unlike a simple "Hello World" generator, `go-micro-gen` sets up an **entire ecos
 - ✅ **Database Migrations** out of the box (with `golang-migrate`)
 - ✅ **Docker & Docker-Compose** (App + DB + Redis + Prometheus + Grafana)
 - ✅ **GitHub Actions / GitLab CI Pipeline** configurations
+- ✅ **Serverless Scaffolding** (AWS Lambda / GCP Cloud Functions)
+- ✅ **JWT Authentication & Authorization** Middleware Support
+- ✅ **GraphQL API** code generation (`gqlgen`)
+- ✅ **Database Seeding** for automated mock development data (`gofakeit`)
 - ✅ **Standard Makefile** tools and `.golangci.yml` linter setup
 - ✅ **Graceful shutdown**, unit tests, and health/readiness endpoints
 
@@ -140,7 +145,16 @@ go-micro-gen uninstall
 
 ## Quick Start
 
-### Interactive Mode
+### 🖥️ Interactive Web UI (Recommended)
+
+Generate your complete microservice infrastructure aesthetically! Rather than answering terminal prompts, `go-micro-gen` ships with a fully embedded, lightning-fast dark mode UI:
+
+```bash
+go-micro-gen ui
+```
+This automatically launches an ultra-light embedded GUI on your browser (`localhost:8080`) built 100% natively without Python/Node.js dependencies.
+
+### 💻 Interactive CLI Mode
 
 Simply run the `generate` command and answer the prompts:
 
@@ -285,12 +299,13 @@ order-service/
 
 ## Roadmap & Future Ideas
 
-- [ ] **Interactive Web UI (`go-micro-gen ui`)** — A visual dashboard to configure and generate services.
-- [x] **GraphQL Support** — Scaffolding for `gqlgen` to build GraphQL endpoints alongside REST/gRPC.
-- [ ] **Event-Driven Workers** — Pre-configured consumers/listeners for Kafka and RabbitMQ.
-- [ ] **JWT Auth Middleware** — Out-of-the-box authentication & role-based authorization injected into transports.
-- [ ] **Serverless Scaffolding** — Generate AWS Lambda / GCP Cloud Functions entrypoints from the same logic.
-- [ ] **Database Seeding** — Auto-generated mock data seeders for local development and testing.
+The original roadmap has been **100% completed**. Here are advanced architecture features planned next:
+
+- [ ] **gRPC Gateway Integration** — Automatically generate HTTP reverse proxies allowing REST to gRPC transcoding instantly.
+- [ ] **OpenAPI Driven Generation** — Parse an existing `swagger.yaml` contract and auto-generate the complete Chi HTTP routing interfaces accurately.
+- [ ] **Outbox Pattern Boilerplate** — Transactional outbox pattern embedded directly into database repository layers for completely reliable Event-Driven microservices.
+- [ ] **Distributed Tracing Viewer (Jaeger)** — Adding comprehensive end-to-end tracing observability within the `docker-compose` graph.
+- [ ] **Auto Mock Generation** — Out-of-the-box integration binding `mockery` directly to the `Repository` and `Service` architecture interfaces for instantaneous Test-Driven Development loops.
 
 ---
 
