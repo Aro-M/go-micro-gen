@@ -156,13 +156,13 @@ You'll see an interactive interface like this:
 
 ```text
 ? Service name:          order-service
-? Go module path:        github.com/acme/order-service
 ? Architecture pattern:  [clean / hexagonal / ddd / vertical / standard]
 ? Database:              [postgres / mongo / none]
 ? Message Broker:        [kafka / rabbitmq / nats / none]
-? Transport Protocol:    [http / grpc / both]
+? Transport Protocol:    [http / grpc / both / none]
 ? Include Redis?         (y/N)
 ? Include Docker & Docker Compose setup? (Y/n)
+? Include Grafana dashboard? (Y/n)
 ? Include Kubernetes manifests (Deployment, Service, etc.)? (y/N)
 ? Include Helm charts?   (y/N)
 ? Cloud provider:        [aws / gcp / none]
@@ -177,6 +177,7 @@ You'll see an interactive interface like this:
   Transp:   both
   Redis:    false
   Docker:   true
+  Grafana:  true
   K8s:      false
   Helm:     false
   Cloud:    aws
@@ -204,6 +205,7 @@ go-micro-gen generate \
   --ci github \
   --redis=false \
   --docker=false \
+  --grafana=false \
   --k8s=false \
   --helm=false \
   --output ./payment-service \

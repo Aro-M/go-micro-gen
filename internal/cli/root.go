@@ -31,10 +31,12 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
+var Version = "v1.3.1"
+
 func getVersion() string {
 	info, ok := debug.ReadBuildInfo()
 	if !ok || info.Main.Version == "" || info.Main.Version == "(devel)" {
-		return "dev"
+		return Version
 	}
 	return info.Main.Version
 }

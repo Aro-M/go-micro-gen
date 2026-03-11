@@ -38,9 +38,7 @@ var initCmd = &cobra.Command{
 		}
 
 		if cfg.ModulePath == "" {
-			if err := askModule(cfg); err != nil {
-				return err
-			}
+			cfg.ModulePath = "github.com/acme/" + cfg.ServiceName
 		}
 
 		// 3. Ask standard questions, skipping Name, Module, OutputDir

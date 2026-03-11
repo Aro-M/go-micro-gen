@@ -188,15 +188,8 @@ func askModule(cfg *config.ServiceConfig) error {
 		cfg.ModulePath = flagModule
 		return nil
 	}
-	defaultModule := fmt.Sprintf("github.com/acme/%s", cfg.ServiceName)
-	err := survey.AskOne(&survey.Input{
-		Message: "Go module path:",
-		Default: defaultModule,
-	}, &cfg.ModulePath)
-	if cfg.ModulePath == "" {
-		cfg.ModulePath = defaultModule
-	}
-	return err
+	cfg.ModulePath = fmt.Sprintf("github.com/acme/%s", cfg.ServiceName)
+	return nil
 }
 
 func askArch(cfg *config.ServiceConfig) error {
