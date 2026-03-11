@@ -162,6 +162,7 @@ You'll see an interactive interface like this:
 ? Transport Protocol:    [http / grpc / both / none]
 ? Include Redis?         (y/N)
 ? Include Docker & Docker Compose setup? (Y/n)
+? Include Prometheus & OpenTelemetry Collector? (Y/n)
 ? Include Grafana dashboard? (Y/n)
 ? Include Kubernetes manifests (Deployment, Service, etc.)? (y/N)
 ? Include Helm charts?   (y/N)
@@ -205,6 +206,7 @@ go-micro-gen generate \
   --ci github \
   --redis=false \
   --docker=false \
+  --prometheus=false \
   --grafana=false \
   --k8s=false \
   --helm=false \

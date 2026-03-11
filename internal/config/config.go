@@ -130,6 +130,8 @@ type ServiceConfig struct {
 	IncludeGrafana bool
 	// Whether to include Docker assets
 	IncludeDocker bool
+	// Whether to include Prometheus
+	IncludePrometheus bool
 	// Whether to include K8s
 	IncludeK8s bool
 	// Whether to include Helm

@@ -34,6 +34,8 @@ var (
 	flagDockerSet     bool
 	flagGrafana       bool
 	flagGrafanaSet    bool
+	flagPrometheus    bool
+	flagPrometheusSet bool
 	flagK8s           bool
 	flagK8sSet        bool
 	flagHelm          bool
@@ -65,6 +67,7 @@ func init() {
 	generateCmd.Flags().BoolVar(&flagServerless, "serverless", false, "Include Serverless deployment wrappers")
 	generateCmd.Flags().BoolVar(&flagSeeding, "seeding", false, "Include DB mock seeder wrappers")
 	generateCmd.Flags().BoolVar(&flagDocker, "docker", false, "Include Docker setup")
+	generateCmd.Flags().BoolVar(&flagPrometheus, "prometheus", false, "Include Prometheus & OpenTelemetry")
 	generateCmd.Flags().BoolVar(&flagGrafana, "grafana", false, "Include Grafana dashboard")
 	generateCmd.Flags().BoolVar(&flagK8s, "k8s", false, "Include Kubernetes manifests")
 	generateCmd.Flags().BoolVar(&flagHelm, "helm", false, "Include Helm charts")
@@ -79,6 +82,7 @@ func init() {
 		flagServerlessSet = generateCmd.Flags().Changed("serverless")
 		flagSeedingSet = generateCmd.Flags().Changed("seeding")
 		flagDockerSet = generateCmd.Flags().Changed("docker")
+		flagPrometheusSet = generateCmd.Flags().Changed("prometheus")
 		flagGrafanaSet = generateCmd.Flags().Changed("grafana")
 		flagK8sSet = generateCmd.Flags().Changed("k8s")
 		flagHelmSet = generateCmd.Flags().Changed("helm")
@@ -125,6 +129,9 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if err := askDocker(cfg); err != nil {
+		return err
+	}
+	if err := askPrometheus(cfg); err != nil {
 		return err
 	}
 	if err := askGrafana(cfg); err != nil {
@@ -359,8 +366,23 @@ func askDocker(cfg *config.ServiceConfig) error {
 	}, &cfg.IncludeDocker)
 }
 
-func askGrafana(cfg *config.ServiceConfig) error {
+func askPrometheus(cfg *config.ServiceConfig) error {
 	if !cfg.IncludeDocker {
+		cfg.IncludePrometheus = false
+		return nil
+	}
+	if flagPrometheusSet {
+		cfg.IncludePrometheus = flagPrometheus
+		return nil
+	}
+	return survey.AskOne(&survey.Confirm{
+		Message: "Include Prometheus & OpenTelemetry Collector?",
+		Default: true,
+	}, &cfg.IncludePrometheus)
+}
+
+func askGrafana(cfg *config.ServiceConfig) error {
+	if !cfg.IncludePrometheus {
 		cfg.IncludeGrafana = false
 		return nil
 	}
@@ -452,6 +474,7 @@ func printSummary(cfg *config.ServiceConfig) {
 	fmt.Printf("  JWT:      %s\n", color.CyanString(fmt.Sprintf("%t", cfg.IncludeJWT)))
 	fmt.Printf("  Redis:    %s\n", color.CyanString(fmt.Sprintf("%t", cfg.IncludeRedis)))
 	fmt.Printf("  %s  %v\n", bold("Docker: "), cfg.IncludeDocker)
+	fmt.Printf("  %s  %v\n", bold("Prometheus:"), cfg.IncludePrometheus)
 	fmt.Printf("  %s  %v\n", bold("Grafana:"), cfg.IncludeGrafana)
 	fmt.Printf("  %s  %v\n", bold("K8s:    "), cfg.IncludeK8s)
 	fmt.Printf("  %s  %v\n", bold("Helm:   "), cfg.IncludeHelm)

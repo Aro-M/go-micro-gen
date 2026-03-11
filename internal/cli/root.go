@@ -31,7 +31,7 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
-var Version = "v1.3.4"
+var Version = "v1.3.7"
 
 func getVersion() string {
 	info, ok := debug.ReadBuildInfo()

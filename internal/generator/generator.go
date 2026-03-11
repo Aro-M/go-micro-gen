@@ -173,6 +173,12 @@ func (g *Generator) shouldInclude(tmplPath string) bool {
 	if strings.Contains(tmplPath, "docker/") && !g.cfg.IncludeDocker {
 		return false
 	}
+	if strings.HasSuffix(tmplPath, "prometheus.yml.tmpl") && !g.cfg.IncludePrometheus {
+		return false
+	}
+	if strings.HasSuffix(tmplPath, "otel-collector-config.yml.tmpl") && !g.cfg.IncludePrometheus {
+		return false
+	}
 	if strings.Contains(tmplPath, "k8s/") && !g.cfg.IncludeK8s {
 		return false
 	}
