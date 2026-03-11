@@ -32,6 +32,8 @@ var (
 	flagSeedingSet    bool
 	flagDocker        bool
 	flagDockerSet     bool
+	flagGrafana       bool
+	flagGrafanaSet    bool
 	flagK8s           bool
 	flagK8sSet        bool
 	flagHelm          bool
@@ -63,6 +65,7 @@ func init() {
 	generateCmd.Flags().BoolVar(&flagServerless, "serverless", false, "Include Serverless deployment wrappers")
 	generateCmd.Flags().BoolVar(&flagSeeding, "seeding", false, "Include DB mock seeder wrappers")
 	generateCmd.Flags().BoolVar(&flagDocker, "docker", false, "Include Docker setup")
+	generateCmd.Flags().BoolVar(&flagGrafana, "grafana", false, "Include Grafana dashboard")
 	generateCmd.Flags().BoolVar(&flagK8s, "k8s", false, "Include Kubernetes manifests")
 	generateCmd.Flags().BoolVar(&flagHelm, "helm", false, "Include Helm charts")
 	generateCmd.Flags().StringVar(&flagOutput, "output", "", "Output directory")
@@ -76,6 +79,7 @@ func init() {
 		flagServerlessSet = generateCmd.Flags().Changed("serverless")
 		flagSeedingSet = generateCmd.Flags().Changed("seeding")
 		flagDockerSet = generateCmd.Flags().Changed("docker")
+		flagGrafanaSet = generateCmd.Flags().Changed("grafana")
 		flagK8sSet = generateCmd.Flags().Changed("k8s")
 		flagHelmSet = generateCmd.Flags().Changed("helm")
 	}
@@ -121,6 +125,9 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if err := askDocker(cfg); err != nil {
+		return err
+	}
+	if err := askGrafana(cfg); err != nil {
 		return err
 	}
 	if err := askK8s(cfg); err != nil {
@@ -182,10 +189,14 @@ func askModule(cfg *config.ServiceConfig) error {
 		return nil
 	}
 	defaultModule := fmt.Sprintf("github.com/acme/%s", cfg.ServiceName)
-	return survey.AskOne(&survey.Input{
+	err := survey.AskOne(&survey.Input{
 		Message: "Go module path:",
 		Default: defaultModule,
-	}, &cfg.ModulePath, survey.WithValidator(survey.Required))
+	}, &cfg.ModulePath)
+	if cfg.ModulePath == "" {
+		cfg.ModulePath = defaultModule
+	}
+	return err
 }
 
 func askArch(cfg *config.ServiceConfig) error {
@@ -241,7 +252,7 @@ func askTransport(cfg *config.ServiceConfig) error {
 	var answer string
 	err := survey.AskOne(&survey.Select{
 		Message: "Transport Protocol:",
-		Options: []string{"http", "grpc", "both"},
+		Options: []string{"http", "grpc", "both", "none"},
 		Default: "http",
 	}, &answer)
 	cfg.Transport = config.TransportType(answer)
@@ -355,6 +366,21 @@ func askDocker(cfg *config.ServiceConfig) error {
 	}, &cfg.IncludeDocker)
 }
 
+func askGrafana(cfg *config.ServiceConfig) error {
+	if !cfg.IncludeDocker {
+		cfg.IncludeGrafana = false
+		return nil
+	}
+	if flagGrafanaSet {
+		cfg.IncludeGrafana = flagGrafana
+		return nil
+	}
+	return survey.AskOne(&survey.Confirm{
+		Message: "Include Grafana dashboard?",
+		Default: true,
+	}, &cfg.IncludeGrafana)
+}
+
 func askK8s(cfg *config.ServiceConfig) error {
 	if flagK8sSet {
 		cfg.IncludeK8s = flagK8s
@@ -433,6 +459,7 @@ func printSummary(cfg *config.ServiceConfig) {
 	fmt.Printf("  JWT:      %s\n", color.CyanString(fmt.Sprintf("%t", cfg.IncludeJWT)))
 	fmt.Printf("  Redis:    %s\n", color.CyanString(fmt.Sprintf("%t", cfg.IncludeRedis)))
 	fmt.Printf("  %s  %v\n", bold("Docker: "), cfg.IncludeDocker)
+	fmt.Printf("  %s  %v\n", bold("Grafana:"), cfg.IncludeGrafana)
 	fmt.Printf("  %s  %v\n", bold("K8s:    "), cfg.IncludeK8s)
 	fmt.Printf("  %s  %v\n", bold("Helm:   "), cfg.IncludeHelm)
 	fmt.Printf("  %s  %s\n", bold("Cloud:  "), cfg.Cloud)
@@ -460,7 +487,9 @@ func printSuccess(cfg *config.ServiceConfig) {
 	fmt.Printf("    %s\n", cyan("make test        # Run tests"))
 	fmt.Printf("    %s\n", cyan("make lint        # Run golangci-lint"))
 	fmt.Println()
-	fmt.Printf("  Grafana:    %s\n", cyan("http://localhost:3000  (admin/admin)"))
+	if cfg.IncludeGrafana {
+		fmt.Printf("  Grafana:    %s\n", cyan("http://localhost:3000  (admin/admin)"))
+	}
 	fmt.Printf("  Prometheus: %s\n", cyan("http://localhost:9090"))
 	fmt.Printf("  Service:    %s\n", cyan("http://localhost:8080"))
 	fmt.Println()

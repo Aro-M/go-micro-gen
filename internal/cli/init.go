@@ -74,6 +74,9 @@ var initCmd = &cobra.Command{
 		if err := askDocker(cfg); err != nil {
 			return err
 		}
+		if err := askGrafana(cfg); err != nil {
+			return err
+		}
 		if err := askK8s(cfg); err != nil {
 			return err
 		}
@@ -126,6 +129,7 @@ func init() {
 	initCmd.Flags().BoolVar(&flagServerless, "serverless", false, "Include Serverless deployment wrappers")
 	initCmd.Flags().BoolVar(&flagSeeding, "seeding", false, "Include DB mock seeder wrappers")
 	initCmd.Flags().BoolVar(&flagDocker, "docker", false, "Include Docker setup")
+	initCmd.Flags().BoolVar(&flagGrafana, "grafana", false, "Include Grafana dashboard")
 	initCmd.Flags().BoolVar(&flagK8s, "k8s", false, "Include Kubernetes manifests")
 	initCmd.Flags().BoolVar(&flagHelm, "helm", false, "Include Helm charts")
 	initCmd.Flags().BoolVarP(&flagYes, "yes", "y", false, "Skip confirmation prompt")
@@ -137,6 +141,7 @@ func init() {
 		flagServerlessSet = initCmd.Flags().Changed("serverless")
 		flagSeedingSet = initCmd.Flags().Changed("seeding")
 		flagDockerSet = initCmd.Flags().Changed("docker")
+		flagGrafanaSet = initCmd.Flags().Changed("grafana")
 		flagK8sSet = initCmd.Flags().Changed("k8s")
 		flagHelmSet = initCmd.Flags().Changed("helm")
 	}

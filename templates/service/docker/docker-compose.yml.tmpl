@@ -141,6 +141,7 @@ services:
     networks:
       - {{.ServiceName}}-net
 
+{{- if .IncludeGrafana}}
   # ─── Grafana ──────────────────────────────────────────────────────────────
   grafana:
     image: grafana/grafana:latest
@@ -159,6 +160,7 @@ services:
       - prometheus
     networks:
       - {{.ServiceName}}-net
+{{- end}}
 
 # ─── Volumes ───────────────────────────────────────────────────────────────────
 volumes:
@@ -172,7 +174,9 @@ volumes:
   redis_data:
 {{- end}}
   prometheus_data:
+{{- if .IncludeGrafana}}
   grafana_data:
+{{- end}}
 
 # ─── Networks ──────────────────────────────────────────────────────────────────
 networks:

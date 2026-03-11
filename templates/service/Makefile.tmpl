@@ -61,7 +61,9 @@ up:
 	@echo "  App:        http://localhost:8080"
 	@echo "  Health:     http://localhost:8080/health"
 	@echo "  Prometheus: http://localhost:9090"
+{{- if .IncludeGrafana}}
 	@echo "  Grafana:    http://localhost:3000"
+{{- end}}
 
 ## down: Stop all services
 down:

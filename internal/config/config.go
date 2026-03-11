@@ -26,6 +26,7 @@ const (
 	TransportHTTP TransportType = "http"
 	TransportGRPC TransportType = "grpc"
 	TransportBoth TransportType = "both"
+	TransportNone TransportType = "none"
 )
 
 // CloudProvider represents the cloud provider.
@@ -125,6 +126,8 @@ type ServiceConfig struct {
 	IncludeServerless bool
 	// Whether to include DB mock seeder
 	IncludeSeeding bool
+	// Whether to include Grafana
+	IncludeGrafana bool
 	// Whether to include Docker assets
 	IncludeDocker bool
 	// Whether to include K8s
